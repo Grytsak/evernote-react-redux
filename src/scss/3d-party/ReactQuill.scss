@@ -1,0 +1,23 @@
+@import '../helpers//variables.scss';
+
+.ql-toolbar.ql-snow {
+    border: none;
+    border-bottom: 1px solid $main-black;
+}
+
+.ql-container.ql-snow {
+    height: calc(100vh - 169px);
+    border: none;
+}
+  
+.ql-snow.ql-toolbar button .ql-stroke {
+    stroke: $light-grey;
+}
+
+.ql-snow.ql-toolbar .ql-picker-label {
+    color: $light-grey;
+}
+
+.ql-snow.ql-toolbar .ql-picker-label .ql-stroke {
+    stroke: $light-grey;
+}

@@ -1,0 +1,57 @@
+@import '../../helpers/variables.scss';
+
+.note_editor {
+    // width: calc(100% - 620px);
+    width: 100%;
+}
+
+.note_editor_top {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    background-color: $lighter-black;
+    border-bottom: 1px solid $main-black;
+    box-sizing: border-box;
+    padding: 5px;
+}
+
+.note_editor__top_item {
+    margin-right: 10px;
+}
+
+.note_editor_top_menu_icon {
+    color: $light-grey;
+    cursor: pointer;
+}
+
+.note_editor__notebook_icon {
+    color: $light-grey;
+    cursor: pointer;
+    padding-right: 8px;
+}
+
+.note_editor__note_title {
+    width: 100%;
+    height: 87px;
+    background-color: $lighter-black;
+    border: none;
+    border-bottom: 1px solid $main-black;
+    box-sizing: border-box;
+    color: $light-grey;
+    font-size: 24px;
+    font-weight: bold;
+    outline: none;
+    padding: 24px 40px;
+}
+
+.note_editor__text_editor {
+    width: 100%;
+    height: calc(100vh - 128px);
+    box-sizing: border-box;
+    background-color: $lighter-black;
+    border: none;
+    color: $light-grey;
+    outline: none;
+    padding: 0;
+}

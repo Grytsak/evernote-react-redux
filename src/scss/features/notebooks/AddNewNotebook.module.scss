@@ -1,0 +1,73 @@
+@import '../../helpers/variables.scss';
+
+.add_notebook {
+    margin-left: auto;
+}
+
+.add_notebook__btn {
+    color: $main-green;
+    cursor: pointer;
+}
+
+.add_notebook__icon {
+    padding-right: 8px;
+}
+
+.add_notebook__popup {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 999;
+}
+
+.active .add_notebook__popup {
+    display: flex !important;
+} 
+
+.add_notebook__popup_container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    width: 500px;
+    background-color: $lighter-black;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.add_notebook__popup_close {
+    position: absolute;
+    cursor: pointer;
+    right: 15px;
+    top: 15px;
+}
+
+.add_notebook__popup_title {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.add_notebook__name_input {
+    width: 100%;
+    height: 30px;
+    background-color: $lighter-black;
+    border-radius: 8px;
+    border: 1px solid $main-grey;
+    color: $light-grey;
+    margin-bottom: 20px;
+    padding: 5px 10px;
+}
+
+.add_notebook__popup_add_btn {
+    margin-left: auto;
+}

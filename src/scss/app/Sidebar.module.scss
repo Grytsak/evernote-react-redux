@@ -1,0 +1,26 @@
+@import '../helpers/variables.scss';
+
+.sidebar {
+    width: 240px;
+    height: 100vh;
+    background-color: $main-black;
+}
+
+.sidebar__item {
+    color: $main-grey;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px;
+    text-align: left;
+}
+
+.sidebar__link {
+    color: $main-grey;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.sidebar__icon {
+    color: $main-grey;
+    padding-right: 8px;
+}

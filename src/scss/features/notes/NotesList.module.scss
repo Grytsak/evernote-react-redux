@@ -1,0 +1,50 @@
+@import '../../helpers/variables.scss';
+
+.notes_list {
+    width: 380px;
+    height: 100vh;
+    background-color: $secondary-black;
+    border-right: 1px solid $main-black;
+    * {
+        color: $light-grey;
+    }
+}
+
+.notes_list__head {
+    padding: 10px;
+}
+
+.notes_list__main_title {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.notes_list__head_icon {
+    padding-right: 10px;
+}
+
+.notes_list__notes_container {
+    height: calc(100vh - 86px);
+    overflow: auto;
+}
+
+.notes_list__note {
+    border-top: 1px solid $main-black;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.notes_list__note_title {
+    font-weight: bold;
+}
+
+.notes_list__note_text {
+    font-size: 14px;
+    margin: 15px 0;
+}
+
+.notes_list__note_date {
+    font-size: 13px;
+    font-weight: 300;
+}

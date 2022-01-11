@@ -1,0 +1,86 @@
+@import '../../helpers/variables.scss';
+
+.notebooks_list {
+    width: calc(100% - 240px);
+    background-color: $lighter-black;
+    color: $light-grey;
+    padding: 10px;
+}
+
+.notebooks_list__top {
+    display: flex;
+    align-items: center;
+    margin: 30px 0 10px;
+}
+
+.notebooks_list__list_container {
+    border-top: 3px solid $main-grey;
+    padding: 10px 0;
+}
+
+.notebooks_list__list_item {
+    display: flex;
+    align-items: center;
+}
+
+.notebooks_list__carret_icon {
+    cursor: pointer;
+    padding: 8px;
+    transition: all 0.2s;
+}
+
+.notebooks_list__carret_icon:hover {
+    transform: scale(1.15);
+}
+
+:global(.active) .notebooks_list__carret_icon {
+    transform: rotate(90deg);
+}
+
+:global(.active) .notebooks_list__carret_icon:hover {
+    transform: rotate(90deg) scale(1.15);
+}
+
+.notebooks_list__notebook_name {
+    cursor: pointer;
+}
+
+.notebooks_list__notebook_name_link {
+    color: $light-grey;
+    text-decoration: none;
+}
+
+.notebooks_list__notebook_name:hover {
+    text-decoration: underline;
+}
+
+.notebooks_list__notebook_icon {
+    padding-right: 8px;
+}
+
+.notebooks_list__notebook_notes_count {
+    color: $main-grey;
+    font-size: 14px;
+    padding-left: 5px;
+}
+
+.notebooks_list__notes {
+    display: none;
+    padding-top: 15px;
+    padding-left: 25px;
+}
+
+:global(.active) .notebooks_list__notes {
+    display: flex;
+     flex-wrap: wrap;
+}
+
+.notebooks_list__notes_item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 5px 0;
+    &:last-of-type {
+        padding-bottom: 10px;
+    }
+}
