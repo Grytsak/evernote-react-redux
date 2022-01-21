@@ -1,11 +1,14 @@
 export const toggleMenu = (e) => {
+    const menu = e.target.parentElement;
+    if(!menu.querySelector('.actions_menu_elements').firstChild) {
+        return
+    }
+
     let elements = document.querySelectorAll('.actions_menu');
     elements.forEach(element => {
-        console.log('element:', element);
         element.classList.remove('active');
     })
 
-    const menu = e.target.parentElement;
     if(menu.classList.contains('actions_menu')) {
         menu.classList.toggle('active');
     } 

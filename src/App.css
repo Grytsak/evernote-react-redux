@@ -7,6 +7,11 @@
   display: flex;
 }
 
+.app-container {
+  display: flex;
+  width: 100%;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -42,3 +47,11 @@
     transform: translateY(0px);
   }
 }
+
+/*  Helper classes  */
+.inactive {
+  cursor: inherit !important;
+  pointer-events: none;
+  opacity: 0.7;
+}
+/*  Helper classes  end*/

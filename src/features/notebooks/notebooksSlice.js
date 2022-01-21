@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 import { NotebookList } from "./NotebooksList";
 
 const initialState = {
@@ -6,6 +6,12 @@ const initialState = {
         {
             id: 'common-notebook',
             name: 'Common',
+            notes: [],
+            date: new Date().toISOString()
+        },
+        {
+            id: 'trash-notebook',
+            name: 'Trash',
             notes: [],
             date: new Date().toISOString()
         }
@@ -51,15 +57,67 @@ const notebooksSlice = createSlice({
             }
         },
 
-        deleteNoteInNotebook(state, action) {
-            const {id, notebookId}  = action.payload;
+        moveNoteToTrashInNotebook(state, action) {
+            const {selectedNote, notebookId}  = action.payload;
             const existingNotebook = state.notebooksArray.find(notebook => notebook.id ===  notebookId);
+            const notebookTrash = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook')
             existingNotebook.notes.find((note, index) => {
-                if(note.id === id) {
+                if(note.id === selectedNote.id) {
                     existingNotebook.notes.splice(index, 1);
+                    notebookTrash.notes.push({
+                        ...selectedNote,
+                        notebook: 'trash-notebook',
+                        inTrash: true,
+                        beforeTrashNotebook: notebookId
+                    });
                     return note;
                 }
             });
+        },
+
+        restoreNoteInNotebook(state, action) {
+            const selectedNote = action.payload;
+            const notebookId = selectedNote.beforeTrashNotebook;
+            state.notebooksArray.find(notebook => {
+                if(notebook.id === notebookId) {
+                    notebook.notes.push({
+                        ...selectedNote,
+                        notebook: notebookId,
+                        inTrash: false,
+                        beforeTrashNotebook: ''
+                    })
+                }
+            })
+            const trashNotes = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook').notes;
+            trashNotes.find((note, index) => {     
+                if(note.id === selectedNote.id) {
+                    trashNotes.splice(index, 1);
+                    return note;
+                }
+            })
+        },
+
+        deleteNoteInNotebook(state, action) {
+            const id = action.payload;
+            const trashNotes = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook').notes;
+
+            trashNotes.find((note, index) => {     
+                if(note.id === id) {
+                    trashNotes.splice(index, 1);
+                    return note;
+                }
+            })
+        },
+
+        renameNotebook(state, action) {
+            const {id, newName} = action.payload;
+
+            state.notebooksArray.find(notebook => {
+                if(notebook.id === id) {
+                    notebook.name = newName;
+                    return notebook;
+                }
+            })
         },
 
         selectNotebook(state, action) {
@@ -93,13 +151,20 @@ export const {
     addNewNotebook,
     addNoteToNotebook,
     editNoteInNotebook,
+    moveNoteToTrashInNotebook,
+    restoreNoteInNotebook,
     deleteNoteInNotebook,
     selectNotebook,
     changeNoteNotebook,
+    renameNotebook
 } = notebooksSlice.actions;
 
 export const selectNotebooks = (state) => {
     return state.notebooks.notebooksArray;
+}
+
+export const selectTrashNotebook = (state) => {
+    return state.notebooks.notebooksArray.find(notebook => notebook.id === 'trash-notebook');
 }
 
 export default notebooksSlice.reducer;

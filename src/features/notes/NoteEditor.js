@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { editNote, deleteNote, selectNote, selectSelectedNote } from './notesSlice';
+import { editNote, 
+        moveNoteToTrash,
+        deleteNote,
+        restoreNote, 
+        selectNote, 
+        selectSelectedNote } from './notesSlice';
 import { changeNotebook } from '../notes/notesSlice';
 import { editNoteInNotebook, 
+        moveNoteToTrashInNotebook,
+        restoreNoteInNotebook,
         deleteNoteInNotebook, 
         selectNotebooks, 
         changeNoteNotebook } from '../notebooks/notebooksSlice';
 import { Link } from 'react-router-dom';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -25,6 +31,7 @@ export const NoteEditor = () => {
     const notebooks = useSelector(selectNotebooks);
     const selectedNoteNotebook = notebooks.find(notenook => notenook.id === selectedNote.notebook);
 
+
     const onEditNoteTitle = (e) => {
         dispatch(editNote({id: selectedNote.id, title: e.target.value, content: selectedNote.content }));
         dispatch(editNoteInNotebook({id: selectedNote.id, title: e.target.value, content: selectedNote.content, notebookId: selectedNote.notebook }));
@@ -35,14 +42,35 @@ export const NoteEditor = () => {
             dispatch(editNoteInNotebook({id: selectedNote.id, title: selectedNote.title, content: e.target.innerHTML, notebookId: selectedNote.notebook}));
     }
 
-    const onDeleteNote = () => {
-        dispatch(deleteNote(selectedNote.id));
-        dispatch(deleteNoteInNotebook({id: selectedNote.id, notebookId: selectedNote.notebook}));
+    const onNoteMoveToTrash = () => {
+        dispatch(moveNoteToTrash({noteId: selectedNote.id, notebookId: selectedNote.notebook}));
+        dispatch(moveNoteToTrashInNotebook({selectedNote, notebookId: selectedNote.notebook}));
     }
 
     const onChangeNoteNotebook = (selectedNote, notebookId) => {
         dispatch(changeNotebook({selectedNote, notebookId}));
         dispatch(changeNoteNotebook({selectedNote, notebookId}));
+    }
+
+    const onDeleteNote = () => {
+        dispatch(deleteNote(selectedNote.id));
+        dispatch(deleteNoteInNotebook(selectedNote.id));
+    }
+
+    const onRestoreNote = () => {
+        dispatch(restoreNoteInNotebook(selectedNote));
+        dispatch(restoreNote(selectedNote.id))
+    }
+
+    let buttonsTrash = '';
+    if(selectedNote.inTrash) {
+        buttonsTrash = 
+            <div>
+                <p className={commonCss.actions_menu__item} onClick={onDeleteNote}>Delete</p>
+                <p className={commonCss.actions_menu__item} onClick={onRestoreNote}>Restore</p>
+            </div> 
+    } else {
+        buttonsTrash = <p className={commonCss.actions_menu__item} onClick={onNoteMoveToTrash}>Move to Trash</p>
     }
 
     return(
@@ -61,8 +89,8 @@ export const NoteEditor = () => {
                         onClick={toggleMenu}>
                         <FontAwesomeIcon icon="exchange-alt" className={commonCss.actions_menu__icon} />
                     </button>  
-                    <div className={commonCss.actions_menu__container}>
-                        {notebooks.map(notebook => {
+                    <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
+                        {notebooks.filter(notebook => notebook.id !== 'trash-notebook' && notebook.id !== selectedNote.notebook ).map(notebook => {
                             return(<p className={commonCss.actions_menu__item} onClick={() => onChangeNoteNotebook(selectedNote, notebook.id)}>{notebook.name}</p>)
                         })}
                     </div>
@@ -72,9 +100,9 @@ export const NoteEditor = () => {
                     <button className={`${commonCss.actions_menu__togle_btn} ${commonCss.btn}`} onClick={toggleMenu}>
                         <FontAwesomeIcon icon="ellipsis-h" className={commonCss.actions_menu__icon} />
                     </button>  
-                    <div className={commonCss.actions_menu__container}>
-                        <p className={commonCss.actions_menu__item}>Move</p>
-                        <p className={commonCss.actions_menu__item} onClick={onDeleteNote}>Delete</p>
+                    <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
+                        <p className={commonCss.actions_menu__item}>Move</p> 
+                        {buttonsTrash}
                     </div>
                 </div>
             </div>

@@ -3,8 +3,10 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectNotebooks } from './notebooksSlice';
 import { selectNote } from '../notes/notesSlice';
-import { AddNewNotebook } from './AddNewNotebook';
 import { toggleMenu } from '../../app/helper-functions';
+
+import { AddNewNotebook } from './AddNewNotebook';
+import { RenameNotebookPopup } from './RenameNotebookPopup';
 
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,7 +27,17 @@ export const NotebookList = () => {
         dispatch(selectNote(note));
     }
 
-    const renderNotebooks = noteBooks.map(notebook => {
+    const openPopup = (id) => {
+        document.body.classList.add('active-popup');
+        document.querySelector('.notebook-rename-popup').setAttribute('data-notebook-id', id);
+    }
+
+    const renderNotebooks = noteBooks.filter( notebook => {
+        if(notebook.id === 'trash-notebook') {
+            return false;
+        } 
+        return true;
+    }).map(notebook => {
         const notes = notebook.notes;
 
         const renderNotebookNotes = notes.map(note => {
@@ -41,7 +53,7 @@ export const NotebookList = () => {
                                 <button className={`${commonCss.actions_menu__togle_btn} ${commonCss.btn}`} onClick={toggleMenu}>
                                     <FontAwesomeIcon icon="ellipsis-h" className={commonCss.actions_menu__icon} />
                                 </button>  
-                                <div className={commonCss.actions_menu__container}>
+                                <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
                                     <p className={commonCss.actions_menu__item}>Rename</p>
                                     <p className={commonCss.actions_menu__item}>Delete</p>
                                 </div>
@@ -65,8 +77,10 @@ export const NotebookList = () => {
                             <button className={`${commonCss.actions_menu__togle_btn} ${commonCss.btn}`} onClick={toggleMenu}>
                                 <FontAwesomeIcon icon="ellipsis-h" className={commonCss.actions_menu__icon} />
                             </button>  
-                            <div className={commonCss.actions_menu__container}>
-                                {notebook.id !== 'common-notebook' ? <p className={commonCss.actions_menu__item}>Rename</p> : ''}
+                            <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
+                                {notebook.id !== 'common-notebook' ? 
+                                <p className={commonCss.actions_menu__item} onClick={() => openPopup(notebook.id)}>Rename</p> 
+                                : ''}
                                 <p className={commonCss.actions_menu__item}>Add New Note</p>
                             </div>
                         </div>
@@ -86,6 +100,7 @@ export const NotebookList = () => {
             </div>
 
             <div className={styles.notebooks_list__list_container}>{renderNotebooks}</div>
+            <RenameNotebookPopup />
         </div>
     )
 }

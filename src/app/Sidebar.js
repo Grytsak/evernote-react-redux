@@ -1,6 +1,6 @@
 import  React from 'react';
 import { useDispatch } from 'react-redux';
-import { Link } from "react-router-dom";
+import { Link, useLocation  } from "react-router-dom";
 import { addNewNote } from '../features/notes/notesSlice';
 import { addNoteToNotebook } from '../features/notebooks/notebooksSlice';
 
@@ -12,6 +12,7 @@ import styles from '../scss/app/Sidebar.module.scss';
 
 export const Sidebar = () => {
     const dispath = useDispatch();
+    const location = useLocation();
 
 
     const addNote = () => {
@@ -19,8 +20,10 @@ export const Sidebar = () => {
             id: uuid(),
             title: 'Untitled',
             content: 'content',
+            notebook: /notebook\/.*\S.*/.exec(location.pathname) ? location.pathname.split('/').pop() : 'common-notebook',
             date: new Date().toISOString(),
-            notebook: /notebook\/.*\S.*/.exec(window.location.href) ? window.location.href.split('/').pop() : 'common-notebook'
+            inTrash: false,
+            beforeTrashNotebook: ''
         }
         dispath(addNewNote(note))
         dispath(addNoteToNotebook({note, url: window.location.href}))
@@ -28,7 +31,7 @@ export const Sidebar = () => {
     
     return(
         <div className={styles.sidebar}>
-            <div className={styles.sidebar__item} onClick={addNote}>
+            <div className={`${styles.sidebar__item} ${location.pathname.split('/').pop() === 'trash-notebook' ? 'inactive' : ''}`} onClick={addNote}>
                 <FontAwesomeIcon icon="plus" className={styles.sidebar__icon} /> 
                 Add New
             </div>
@@ -53,8 +56,10 @@ export const Sidebar = () => {
                 Tags
             </div>
             <div className={styles.sidebar__item}>
-                <FontAwesomeIcon icon="trash" className={styles.sidebar__icon} /> 
-                Trash
+                <Link to="/notebook/trash-notebook" className={styles.sidebar__link}>
+                    <FontAwesomeIcon icon="trash" className={styles.sidebar__icon} /> 
+                    Trash
+                </Link>
             </div>
         </div>
     )
