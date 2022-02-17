@@ -95,7 +95,7 @@ export const NotebookList = () => {
         <div className={styles.notebooks_list}>
             <h1 className={styles.notebooks_list__title}>Notebooks</h1>
             <div className={styles.notebooks_list__top}>
-                <p className={styles.notebooks_list__notebooks_count}>{noteBooks.length} {noteBooks.length === 1 ? 'notebook' : 'notebooks'}</p>
+                <p className={styles.notebooks_list__notebooks_count}>{noteBooks.length - 1} {noteBooks.length === 1 ? 'notebook' : 'notebooks'}</p>
                 <AddNewNotebook />
             </div>
 
