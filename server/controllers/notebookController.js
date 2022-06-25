@@ -10,6 +10,20 @@ export const getAllNotebooks = asyncWrapper(async (req, res) => {
     res.status(200).json(notebooks)
 })
 
+// @desc    Get notebook notes
+// @route   GET /api/notebook-notes/:id
+// @access  Private
+export const getNotebookNotes = asyncWrapper(async (req, res) => {
+    const notebook = await Notebook.findById(req.params.id).populate('notes') 
+
+    if(!notebook) {
+        res.status(400)
+        throw new Error('Notebook not found')
+    }
+
+    res.status(200).json(notebook.notes)
+})
+
 // @desc    Add new notebook
 // @route   POST /api/notebooks
 // @access  Private
@@ -36,10 +50,10 @@ export const addNewNotebook = asyncWrapper(async (req, res) => {
     res.status(200).json(notebook)
 })
 
-// @desc    Edit notebook
-// @route   PATCH /api/notebooks
+// @desc    Rename notebook
+// @route   PATCH /api/notebooks/rename/:id
 // @access  Private
-export const editNotebook = asyncWrapper(async (req, res) => {
+export const renameNotebook = asyncWrapper(async (req, res) => {
     const notebook = await Notebook.findById(req.params.id)
 
     if(!notebook) {
@@ -52,7 +66,7 @@ export const editNotebook = asyncWrapper(async (req, res) => {
 })
 
 // @desc    Delete notebook
-// @route   DELETE /api/notebooks/:id
+// @route   DELETE /api/notebooks/delete/:id
 // @access  Private
 export const deleteNotebook = asyncWrapper(async (req, res) => {
     const notebook = await Notebook.findById(req.params.id)
@@ -67,7 +81,7 @@ export const deleteNotebook = asyncWrapper(async (req, res) => {
 })
 
 // @desc    Add note to notebook
-// @route   POST /api/notebooks/add-note
+// @route   POST /api/notebooks/add-note/:id
 // @access  Private
 export const addNoteToNotebook = asyncWrapper(async (req, res) => {
     const { noteID, notebookID } = req.body
@@ -75,6 +89,7 @@ export const addNoteToNotebook = asyncWrapper(async (req, res) => {
         notebookID, 
         {$push: {"notes": noteID}},
         {new: true})
+
     res.status(200).json(notebook)
 })
 
@@ -86,6 +101,6 @@ export const deleteNoteInNotebook = asyncWrapper(async (req, res) => {
     const notebook = await Notebook.findByIdAndUpdate(
         notebookID, 
         {$pull: {"notes": noteID}},
-        {new: true})
-    res.status(200).json(notebook)
+        {new: true}).populate('notes')
+    res.status(200).json({notebook, noteID})
 })

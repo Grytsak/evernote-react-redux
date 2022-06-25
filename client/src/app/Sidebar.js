@@ -1,33 +1,45 @@
-import  React from 'react';
-import { useDispatch } from 'react-redux';
-import { Link, useLocation  } from "react-router-dom";
-import { addNewNote } from '../features/notes/notesSlice';
-import { addNoteToNotebook } from '../features/notebooks/notebooksSlice';
+import  React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { Link, useLocation  } from "react-router-dom"
+import { addNewNote } from '../features/notes/notesSlice'
+import { selectCommonNotebookId, addNoteToNotebook, addNoteToNotebookNotes } from '../features/notebooks/notebooksSlice'
+import { selectMostRecentlyCreatedNoteId } from '../features/notes/notesSlice'
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import uuid from 'react-uuid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
-import styles from '../scss/app/Sidebar.module.scss';
+import styles from '../scss/app/Sidebar.module.scss'
 
 export const Sidebar = () => {
-    const dispath = useDispatch();
-    const location = useLocation();
-
+    const dispatch = useDispatch()
+    const location = useLocation()
+    const commonNotebookId = useSelector(selectCommonNotebookId)
+    const lastCreatedNoteId = useSelector(selectMostRecentlyCreatedNoteId)
+    const [createdNoteNotebook, setCreatedNoteNotebook] = useState('')
+    const [note, setNote] = useState({})
 
     const addNote = () => {
         const note = {
-            id: uuid(),
             title: 'Untitled',
             content: 'content',
-            notebook: /notebook\/.*\S.*/.exec(location.pathname) ? location.pathname.split('/').pop() : 'common-notebook',
-            date: new Date().toISOString(),
+            notebook: /notebook\/.*\S.*/.exec(location.pathname) ? location.pathname.split('/').pop() : commonNotebookId,
             inTrash: false,
             beforeTrashNotebook: ''
         }
-        dispath(addNewNote(note))
-        dispath(addNoteToNotebook({note, url: window.location.href}))
+        setCreatedNoteNotebook(note.notebook)
+        dispatch(addNewNote(note))
+        setNote(note)
     }
+
+    useEffect(() => {
+        if(lastCreatedNoteId) {
+            dispatch(addNoteToNotebook({noteID: lastCreatedNoteId, notebookID: createdNoteNotebook}))
+            dispatch(addNoteToNotebookNotes({note, _id: lastCreatedNoteId}))
+        }
+    }, [lastCreatedNoteId])
+
+
+
     
     return(
         <div className={styles.sidebar}>

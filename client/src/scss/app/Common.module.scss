@@ -85,6 +85,11 @@
     background-color: $lightest-black;
   }
 
+  .actions_menu__item_inactive {
+    color: $lightest-black;
+    pointer-events: none;
+  }
+
   .actions_menu_change_notebook_btn {
     display: none;
   }

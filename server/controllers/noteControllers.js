@@ -25,8 +25,6 @@ export const addNewNote = asyncWrapper(async (req, res) => {
         notebook: req.body.notebook
     })
 
-    const notebook = await Notebook.findByIdAndUpdate(req.body.notebook, req.body.notebook, {new: true})
-
     res.status(200).json(note)
 })
 
@@ -34,6 +32,51 @@ export const addNewNote = asyncWrapper(async (req, res) => {
 // @route   PATCH /api/notes/edit/:id
 // @access  Private
 export const editNote = asyncWrapper(async (req, res) => {
+    const note = await Note.findById(req.params.id)
+
+    if(!note) {
+        res.status(401)
+        throw new Error('Note not found')
+    }
+
+    const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
+    res.status(200).json(editedNote)
+})
+
+// @desc    Change notes nodebook
+// @route   PATCH /api/notes/change-notebook/:id
+// @access  Private
+export const changeNotebook = asyncWrapper(async (req, res) => {
+    const note = await Note.findById(req.params.id)
+
+    if(!note) {
+        res.status(401)
+        throw new Error('Note not found')
+    }
+
+    const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
+    res.status(200).json(editedNote)
+})
+
+// @desc    Move note to trash
+// @route   PATCH /api/trash/edit/:id
+// @access  Private
+export const moveNoteToTrash = asyncWrapper(async (req, res) => {
+    const note = await Note.findById(req.params.id)
+
+    if(!note) {
+        res.status(401)
+        throw new Error('Note not found')
+    }
+
+    const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
+    res.status(200).json(editedNote)
+})
+
+// @desc    Restore note
+// @route   PATCH /api/restore/edit/:id
+// @access  Private
+export const restoreNote = asyncWrapper(async (req, res) => {
     const note = await Note.findById(req.params.id)
 
     if(!note) {

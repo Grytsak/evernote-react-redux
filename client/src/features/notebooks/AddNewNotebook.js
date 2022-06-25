@@ -16,7 +16,6 @@ export const AddNewNotebook = () => {
 
         if (inputName.value) {
             dispatch(addNewNotebook({
-                id: uuid(),
                 name: inputName.value,
                 notes: [],
                 date: new Date().toISOString()

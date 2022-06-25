@@ -20,7 +20,7 @@ const noteSchema = new mongoose.Schema(
             default: false
         },
         beforeTrashNotebook: {
-            type: mongoose.Schema.Types.ObjectId,
+            type: String,
             ref: 'Notebook'
         }
     },

@@ -1,19 +1,21 @@
 import express from 'express'
 const router = express.Router()
 import { 
-    getAllNotebooks, 
+    getAllNotebooks,
+    getNotebookNotes, 
     addNewNotebook,
-    editNotebook,
+    renameNotebook,
     deleteNotebook,
     addNoteToNotebook,
     deleteNoteInNotebook,
 } from '../controllers/notebookController.js'
 
 router.route('/').get(getAllNotebooks).post(addNewNotebook)
-router.route('/edit/:id').patch(editNotebook)
+router.route('/notebook-notes/:id').get(getNotebookNotes)
+router.route('/rename/:id').patch(renameNotebook)
 router.route('/delete/:id').delete(deleteNotebook)
-router.route('/add-note').post(addNoteToNotebook)
-router.route('/delete-note').patch(deleteNoteInNotebook)
+router.route('/add-note/:id').post(addNoteToNotebook)
+router.route('/delete-note/:id').patch(deleteNoteInNotebook)
 
 
 export default router

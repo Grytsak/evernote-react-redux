@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { editNote, 
+import { 
+        editNote, 
         moveNoteToTrash,
         deleteNote,
-        restoreNote, 
-        selectNote, 
-        selectSelectedNote } from './notesSlice';
-import { changeNotebook } from '../notes/notesSlice';
-import { editNoteInNotebook, 
-        moveNoteToTrashInNotebook,
-        restoreNoteInNotebook,
-        deleteNoteInNotebook, 
-        selectNotebooks, 
-        changeNoteNotebook } from '../notebooks/notebooksSlice';
+        changeNotebook,
+        restoreNote,
+        selectSelectedNote
+    } from './notesSlice';    
+import { 
+        selectTrashNotebookId,
+        selectCommonNotebookId,
+        addNoteToNotebook,
+        deleteNoteInNotebook,
+        selectNotebooks,
+        editNoteInNotebook
+    } from '../notebooks/notebooksSlice';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactQuill from 'react-quill';
@@ -26,72 +29,114 @@ import commonCss from '../../scss/app/Common.module.scss';
 
 
 export const NoteEditor = () => {
-    const dispatch = useDispatch();
-    const selectedNote = useSelector(selectSelectedNote);
-    const notebooks = useSelector(selectNotebooks);
-    const selectedNoteNotebook = notebooks.find(notenook => notenook.id === selectedNote.notebook);
+    const dispatch = useDispatch()
+    const trashNotebookId = useSelector(selectTrashNotebookId)
+    const commonNotebookId = useSelector(selectCommonNotebookId)
+    const selectedNote = useSelector(selectSelectedNote)
+    const notebooks = useSelector(selectNotebooks)
+    const selectedNoteNotebook = notebooks.find(notebook => notebook._id === selectedNote.notebook)
+    const beforeTrash = notebooks.find(notebook => notebook._id === selectedNote.beforeTrashNotebook)
+    const [titleValue, setTitleValue] = useState('')
+    const [contentValue, setContentValue] = useState()
+    const [timer, setTimer] = useState(null)
 
+    useEffect(() => {
+        setTitleValue(selectedNote.title)
+        setContentValue(selectedNote.content)
+    }, [selectedNote])
 
     const onEditNoteTitle = (e) => {
-        dispatch(editNote({id: selectedNote.id, title: e.target.value, content: selectedNote.content }));
-        dispatch(editNoteInNotebook({id: selectedNote.id, title: e.target.value, content: selectedNote.content, notebookId: selectedNote.notebook }));
+        setTitleValue(e.target.value)
+        clearTimeout(timer)
+
+        const newTimer = setTimeout(() => {
+            dispatch(editNote({_id: selectedNote._id, title: e.target.value, content: selectedNote.content }))
+            dispatch(editNoteInNotebook({_id: selectedNote._id, title: e.target.value, content: selectedNote.content}))
+          }, 500)
+      
+          setTimer(newTimer)
     }
 
-    const onEditNoteContent = (e) => {
-            dispatch(editNote({id: selectedNote.id, title: selectedNote.title, content: e.target.innerHTML}));
-            dispatch(editNoteInNotebook({id: selectedNote.id, title: selectedNote.title, content: e.target.innerHTML, notebookId: selectedNote.notebook}));
-    }
+    const onEditNoteContent = (val) => {
+        setContentValue(val)
+        clearTimeout(timer)
 
-    const onNoteMoveToTrash = () => {
-        dispatch(moveNoteToTrash({noteId: selectedNote.id, notebookId: selectedNote.notebook}));
-        dispatch(moveNoteToTrashInNotebook({selectedNote, notebookId: selectedNote.notebook}));
+        const newTimer = setTimeout(() => {
+            dispatch(editNote({_id: selectedNote._id, title: selectedNote.title, content: val}))
+            dispatch(editNoteInNotebook({_id: selectedNote._id, title: selectedNote.title, content: val}))
+          }, 500)
+      
+          setTimer(newTimer)
     }
 
     const onChangeNoteNotebook = (selectedNote, notebookId) => {
-        dispatch(changeNotebook({selectedNote, notebookId}));
-        dispatch(changeNoteNotebook({selectedNote, notebookId}));
+        dispatch(changeNotebook({_id: selectedNote._id, notebook: notebookId}))
+        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: selectedNote.notebook}))
+        dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: notebookId}))
     }
 
-    const onDeleteNote = () => {
-        dispatch(deleteNote(selectedNote.id));
-        dispatch(deleteNoteInNotebook(selectedNote.id));
+    const onNoteMoveToTrash = () => {
+        if(selectedNote._id) {
+            dispatch(moveNoteToTrash({
+                _id: selectedNote._id, 
+                notebook: trashNotebookId, 
+                inTrash: true, 
+                beforeTrashNotebook: selectedNote.notebook
+            }));
+            dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: selectedNote.notebook}))
+            dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}))
+        }
     }
 
     const onRestoreNote = () => {
-        dispatch(restoreNoteInNotebook(selectedNote));
-        dispatch(restoreNote(selectedNote.id))
+        dispatch(restoreNote({
+            _id: selectedNote._id, 
+            notebook: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebookId, 
+            inTrash: false, 
+            beforeTrashNotebook: ''
+        }))
+        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}))
+        dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebookId}))
     }
+
+    const onDeleteNote = () => {
+        dispatch(deleteNote(selectedNote._id));
+        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}));
+    }
+
+
 
     let buttonsTrash = '';
     if(selectedNote.inTrash) {
         buttonsTrash = 
             <div>
-                <p className={commonCss.actions_menu__item} onClick={onDeleteNote}>Delete</p>
-                <p className={commonCss.actions_menu__item} onClick={onRestoreNote}>Restore</p>
+                <p className={`${commonCss.actions_menu__item} ${selectedNote._id ? '' : commonCss.actions_menu__item_inactive}`} onClick={onDeleteNote}>Delete</p>
+                <p className={`${commonCss.actions_menu__item} ${selectedNote._id ? '' : commonCss.actions_menu__item_inactive}`} onClick={onRestoreNote}>Restore</p>
             </div> 
     } else {
-        buttonsTrash = <p className={commonCss.actions_menu__item} onClick={onNoteMoveToTrash}>Move to Trash</p>
+        buttonsTrash = <p className={`${commonCss.actions_menu__item} ${selectedNote._id ? '' : commonCss.actions_menu__item_inactive}`} onClick={onNoteMoveToTrash}>Move to Trash</p>
     }
 
     return(
         <div className={styles.note_editor}>
             <div className={styles.note_editor_top}>
                 <Link 
-                    to={selectedNoteNotebook ? `/notebook/${selectedNoteNotebook.id}` : ''} 
+                    to={selectedNoteNotebook ? `/notebook/${selectedNoteNotebook._id}` : ''} 
                     className={`${styles.note_editor__top_item} ${commonCss.link}`}>
                     <FontAwesomeIcon icon="book" className={styles.note_editor__notebook_icon} />
                     <p className={styles.note_editor__notebook_name}>{selectedNoteNotebook ? selectedNoteNotebook.name : ''}</p>
                 </Link>
 
-                <div className={`${commonCss.actions_menu} actions_menu ${selectedNote.id ? 'change-notebook-active' : ''}`}>
+                <div className={`${commonCss.actions_menu} actions_menu ${selectedNote._id ? 'change-notebook-active' : ''}`}>
                     <button 
                         className={`${commonCss.actions_menu__togle_btn} ${commonCss.btn} ${commonCss.actions_menu_change_notebook_btn}`} 
                         onClick={toggleMenu}>
                         <FontAwesomeIcon icon="exchange-alt" className={commonCss.actions_menu__icon} />
                     </button>  
                     <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
-                        {notebooks.filter(notebook => notebook.id !== 'trash-notebook' && notebook.id !== selectedNote.notebook ).map(notebook => {
-                            return(<p className={commonCss.actions_menu__item} onClick={() => onChangeNoteNotebook(selectedNote, notebook.id)}>{notebook.name}</p>)
+                        {notebooks.filter((notebook) => notebook._id !== trashNotebookId && notebook._id !== selectedNote.notebook )
+                        .map((notebook, index) => {
+                            return(<p key={index} className={commonCss.actions_menu__item} onClick={() => onChangeNoteNotebook(selectedNote, notebook._id)}>{notebook.name}</p>)
                         })}
                     </div>
                 </div>
@@ -101,7 +146,7 @@ export const NoteEditor = () => {
                         <FontAwesomeIcon icon="ellipsis-h" className={commonCss.actions_menu__icon} />
                     </button>  
                     <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
-                        <p className={commonCss.actions_menu__item}>Move</p> 
+                        <p className={`${commonCss.actions_menu__item} ${selectedNote._id ? '' : commonCss.actions_menu__item_inactive}`}>Move</p> 
                         {buttonsTrash}
                     </div>
                 </div>
@@ -110,14 +155,17 @@ export const NoteEditor = () => {
                 name="title" 
                 id="note-title" 
                 className={styles.note_editor__note_title}
-                value={selectedNote.title}
+                value={titleValue}
+                // value={selectedNote.title}
                 onChange={onEditNoteTitle}
                 />
             <ReactQuill
                 theme="snow"
                 className={styles.note_editor__text_editor}
-                value={selectedNote.content}
-                onKeyUp={onEditNoteContent}
+                value={contentValue || ''}
+                // value={selectedNote.content}
+                // onKeyUp={onEditNoteContent}
+                onChange={onEditNoteContent}
             />
             {/* <textarea name="text" 
                 id="note-text" 

@@ -1,8 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { selectNotebooks } from './notebooksSlice';
-import { selectNote } from '../notes/notesSlice';
+import { 
+        selectNotebooks, 
+        selectTrashNotebookId,
+        selectCommonNotebookId,
+        addNoteToNotebook,
+        deleteNoteInNotebook,
+        deleteNotebook } 
+        from './notebooksSlice';
+import { selectNote, moveNoteToTrash } from '../notes/notesSlice';
 import { toggleMenu } from '../../app/helper-functions';
 
 import { AddNewNotebook } from './AddNewNotebook';
@@ -17,6 +24,11 @@ import commonCss from '../../scss/app/Common.module.scss';
 export const NotebookList = () => {
     const dispatch = useDispatch();
     const noteBooks = useSelector(selectNotebooks);
+    const trashNotebookId = useSelector(selectTrashNotebookId)
+    const commonNotebookId = useSelector(selectCommonNotebookId)
+
+    const [notebookId, setNotebookId] = useState('')
+    const [notebookName, setNotebookName] = useState('')
 
     const toggleNotes = (e) => {
         const notebookItem = e.target.closest('.notebook-item-container');
@@ -27,24 +39,50 @@ export const NotebookList = () => {
         dispatch(selectNote(note));
     }
 
-    const openPopup = (id) => {
-        document.body.classList.add('active-popup');
-        document.querySelector('.notebook-rename-popup').setAttribute('data-notebook-id', id);
+    const openPopup = (id, name) => {
+        document.body.classList.add('active-popup')
+        setNotebookId(id)
+        setNotebookName(name)
     }
 
+    const onDeleteNotebook = (id) => {
+        const notebook = noteBooks.find(notebook => notebook._id === id)
+        const notebookNotes = notebook.notes
+        const deleteNotebookCallback = () => dispatch(deleteNotebook(id))
+
+        if(notebookNotes.length > 0) {
+            notebookNotes.forEach((note, index) => {
+                dispatch(moveNoteToTrash({
+                    _id: note, 
+                    notebook: trashNotebookId, 
+                    inTrash: true, 
+                    beforeTrashNotebook: commonNotebookId
+                }))
+                dispatch(deleteNoteInNotebook({noteID: note, notebookID: notebook._id}))
+                dispatch(addNoteToNotebook({noteID: note, notebookID: trashNotebookId}))
+                if(index === notebookNotes.length - 1) {
+                    deleteNotebookCallback(id)
+                }
+            })
+        } else {
+            deleteNotebookCallback(id)
+        }
+    }
+
+
     const renderNotebooks = noteBooks.filter( notebook => {
-        if(notebook.id === 'trash-notebook') {
+        if(notebook._id === trashNotebookId) {
             return false;
         } 
         return true;
     }).map(notebook => {
-        const notes = notebook.notes;
+        const notes = notebook.notes
 
         const renderNotebookNotes = notes.map(note => {
             return (
-                <div key={note.id} className={styles.notebooks_list__notes_item}>
+                <div key={note} className={styles.notebooks_list__notes_item}>
                             <p className={styles.notebooks_list__notebook_name}>
-                                <Link to={`/note/${note.id}`} className={styles.notebooks_list__notebook_name_link} onClick={() => markSelected(note)}>
+                                <Link to={`/note/${note}`} className={styles.notebooks_list__notebook_name_link} onClick={() => markSelected(note)}>
                                     <FontAwesomeIcon icon="sticky-note" className={styles.notebooks_list__notebook_icon} />
                                     {note.title}
                                 </Link>
@@ -63,11 +101,11 @@ export const NotebookList = () => {
         })
 
         return(
-            <div key={notebook.id} className={`${styles.notebooks_list__list_item_container} notebook-item-container`}>
+            <div key={notebook._id} className={`${styles.notebooks_list__list_item_container} notebook-item-container`}>
                     <div className={styles.notebooks_list__list_item}>
                         <FontAwesomeIcon icon="caret-right" className={styles.notebooks_list__carret_icon} onClick={toggleNotes} />
                         <p className={styles.notebooks_list__notebook_name}>
-                            <Link to={`/notebook/${notebook.id}`} className={styles.notebooks_list__notebook_name_link}>
+                            <Link to={`/notebook/${notebook._id}`} className={styles.notebooks_list__notebook_name_link}>
                                 <FontAwesomeIcon icon="book" className={styles.notebooks_list__notebook_icon} />
                                 {notebook.name}
                             </Link> 
@@ -79,9 +117,14 @@ export const NotebookList = () => {
                             </button>  
                             <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
                                 {notebook.id !== 'common-notebook' ? 
-                                <p className={commonCss.actions_menu__item} onClick={() => openPopup(notebook.id)}>Rename</p> 
+                                <p className={commonCss.actions_menu__item} onClick={() => openPopup(notebook._id, notebook.name)}>Rename</p> 
                                 : ''}
                                 <p className={commonCss.actions_menu__item}>Add New Note</p>
+                                <p className={`
+                                ${commonCss.actions_menu__item} 
+                                ${notebook._id === commonNotebookId 
+                                ? commonCss.actions_menu__item_inactive : ''}
+                                `} onClick={() => onDeleteNotebook(notebook._id)}>Delete</p>
                             </div>
                         </div>
                     </div>
@@ -100,7 +143,7 @@ export const NotebookList = () => {
             </div>
 
             <div className={styles.notebooks_list__list_container}>{renderNotebooks}</div>
-            <RenameNotebookPopup />
+            <RenameNotebookPopup notebookId={notebookId} notebookName={notebookName} />
         </div>
     )
 }

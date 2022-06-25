@@ -1,170 +1,310 @@
-import { createSlice, current } from "@reduxjs/toolkit";
-import { NotebookList } from "./NotebooksList";
+import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit"
+import * as notebooksService from './notebookService'
 
 const initialState = {
     notebooksArray: [
-        {
-            id: 'common-notebook',
-            name: 'Common',
-            notes: [],
-            date: new Date().toISOString()
-        },
-        {
-            id: 'trash-notebook',
-            name: 'Trash',
-            notes: [],
-            date: new Date().toISOString()
-        }
-    ]
+        // {
+        //     id: 'common-notebook',
+        //     name: 'Common',
+        //     notes: [],
+        //     date: new Date().toISOString()
+        // },
+        // {
+        //     id: 'trash-notebook',
+        //     name: 'Trash',
+        //     notes: [],
+        //     date: new Date().toISOString()
+        // }
+    ],
+    notebookNotesArray: [],
+    commonNotebookId: '62922a2e8a293b5de3d2adc4',
+    trashNotebookId: '62922a1e8a293b5de3d2adc2',
+    isError: false,
+    isSuccess: false,
+    isLoading: false,
+    message: ''
 }
+
+export const getAllNotebooks = createAsyncThunk(
+    'notes/getAllNotebooks',
+    async (_, thunkAPI) => {
+      try {
+        return await notebooksService.getAllNotebooks()
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
+
+export const getNotebookNotes = createAsyncThunk(
+  'notes/getNotebookNotes',
+  async (id, thunkAPI) => {
+    try {
+      return await notebooksService.getNotebookNotes(id)
+    } catch (error) {
+      const message =
+        (error.response &&
+          error.response.data &&
+          error.response.data.message) ||
+        error.message ||
+        error.toString()
+      return thunkAPI.rejectWithValue(message)
+    }
+  }
+)
+
+export const addNewNotebook = createAsyncThunk(
+    'notes/addNewNotebook',
+    async (newNotebook, thunkAPI) => {
+      try {
+        return await notebooksService.addNewNotebook(newNotebook)
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
+
+export const renameNotebook = createAsyncThunk(
+    'notes/renameNotebook',
+    async (obj, thunkAPI) => {
+      try {
+        return await notebooksService.renameNotebook(obj)
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
+
+export const deleteNotebook = createAsyncThunk(
+    'notes/deleteNotebook',
+    async (id, thunkAPI) => {
+      try {
+        return await notebooksService.deleteNotebook(id)
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
+
+export const addNoteToNotebook = createAsyncThunk(
+    'notes/addNoteToNotebook',
+    async (obj, thunkAPI) => {
+      try {
+        return await notebooksService.addNoteToNotebook(obj)
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
+
+export const deleteNoteInNotebook = createAsyncThunk(
+    'notes/deleteNoteInNotebook',
+    async (obj, thunkAPI) => {
+      try {
+        return await notebooksService.deleteNoteInNotebook(obj)
+      } catch (error) {
+        const message =
+          (error.response &&
+            error.response.data &&
+            error.response.data.message) ||
+          error.message ||
+          error.toString()
+        return thunkAPI.rejectWithValue(message)
+      }
+    }
+)
 
 const notebooksSlice = createSlice({
     name: 'notebooks',
     initialState,
     reducers: {
-        addNewNotebook(state, action) {
-            state.notebooksArray.push(action.payload);
-        },
-        
-        addNoteToNotebook(state, action) {
-            const { note, url } = action.payload;
-            let urlParts = url.split('/');
-            let notebookId = urlParts.pop();
-
-            if(url.includes('notebook/')) {
-                state.notebooksArray.find(notebook => {
-                    if(notebook.id === notebookId) {
-                        notebook.notes.push(note);
-                    }
-                })
-            } else {
-                state.notebooksArray.find(notebook => {
-                    if(notebook.id === 'common-notebook') {
-                        notebook.notes.push(note);
-                    }
-                })
-            }
-        },
-
-        editNoteInNotebook(state, action) {
-            const { id, title, content, notebookId } = action.payload;
-            const existingNotebook = state.notebooksArray.find(notebook => notebook.id === notebookId);
-            const exsistingNote = existingNotebook.notes.find(note => note.id === id);
-
-            if(exsistingNote) {
-                exsistingNote.title = title;
-                exsistingNote.content = content;
-            }
-        },
-
-        moveNoteToTrashInNotebook(state, action) {
-            const {selectedNote, notebookId}  = action.payload;
-            const existingNotebook = state.notebooksArray.find(notebook => notebook.id ===  notebookId);
-            const notebookTrash = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook')
-            existingNotebook.notes.find((note, index) => {
-                if(note.id === selectedNote.id) {
-                    existingNotebook.notes.splice(index, 1);
-                    notebookTrash.notes.push({
-                        ...selectedNote,
-                        notebook: 'trash-notebook',
-                        inTrash: true,
-                        beforeTrashNotebook: notebookId
-                    });
-                    return note;
-                }
-            });
-        },
-
-        restoreNoteInNotebook(state, action) {
-            const selectedNote = action.payload;
-            const notebookId = selectedNote.beforeTrashNotebook;
-            state.notebooksArray.find(notebook => {
-                if(notebook.id === notebookId) {
-                    notebook.notes.push({
-                        ...selectedNote,
-                        notebook: notebookId,
-                        inTrash: false,
-                        beforeTrashNotebook: ''
-                    })
-                }
-            })
-            const trashNotes = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook').notes;
-            trashNotes.find((note, index) => {     
-                if(note.id === selectedNote.id) {
-                    trashNotes.splice(index, 1);
-                    return note;
-                }
-            })
-        },
-
-        deleteNoteInNotebook(state, action) {
-            const id = action.payload;
-            const trashNotes = state.notebooksArray.find(notebook => notebook.id === 'trash-notebook').notes;
-
-            trashNotes.find((note, index) => {     
-                if(note.id === id) {
-                    trashNotes.splice(index, 1);
-                    return note;
-                }
-            })
-        },
-
-        renameNotebook(state, action) {
-            const {id, newName} = action.payload;
-
-            state.notebooksArray.find(notebook => {
-                if(notebook.id === id) {
-                    notebook.name = newName;
-                    return notebook;
-                }
-            })
-        },
-
         selectNotebook(state, action) {
-            state.selectedNotebook = action.payload;
+            state.selectedNotebook = action.payload
         },
+        addNoteToNotebookNotes(state, action) {
+            const note = action.payload.note
+            note._id = action.payload._id
+            state.notebookNotesArray.push(note)
+        },
+        editNoteInNotebook(state, action) {
+          const { _id, title, content } = action.payload
+          const exsistingNote = state.notebookNotesArray.find(note => note._id === _id)
+          if(exsistingNote) {
+            exsistingNote.title = title
+            exsistingNote.content = content
+          }
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(getAllNotebooks.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(getAllNotebooks.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(getAllNotebooks.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                state.notebooksArray = action.payload
+            })
+            .addCase(getNotebookNotes.pending, (state) => {
+              state.isLoading = true
+            })
+            .addCase(getNotebookNotes.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(getNotebookNotes.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                state.notebookNotesArray = action.payload
+            })
+            .addCase(addNewNotebook.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(addNewNotebook.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(addNewNotebook.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                state.notebooksArray.push(action.payload)
+            })
+            .addCase(renameNotebook.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(renameNotebook.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(renameNotebook.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                const {_id, name} = action.payload
 
-        changeNoteNotebook(state, action) {
-            const { selectedNote, notebookId } = action.payload;
-            const notebooks = state.notebooksArray;
-            const newNotebook = notebooks.find(notebookIt => notebookIt.id === notebookId);
-
-            notebooks.map(notebookItem => {
-                notebookItem.notes.find((note, index) => {
-                    if(note.id === selectedNote.id) {
-                        notebookItem.notes.splice(index, 1);
-                        newNotebook.notes.push({
-                            ...selectedNote,
-                            notebook: notebookId
-                        });
-                        return 1;
-                        
+                state.notebooksArray.find(notebook => {
+                    if(notebook._id === _id) {
+                        notebook.name = name;
+                        return notebook;
                     }
+                    return null
                 })
             })
-        },
-
+            .addCase(deleteNotebook.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(deleteNotebook.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(deleteNotebook.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                state.notebooksArray = state.notebooksArray.filter(notebook => notebook._id !== action.payload)
+            })
+            .addCase(addNoteToNotebook.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(addNoteToNotebook.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(addNoteToNotebook.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+              
+                state.notebooksArray.find(notebook => {
+                    if(notebook._id === action.payload._id) {
+                        notebook.notes = action.payload.notes
+                    }
+                    return null
+                })
+            })
+            .addCase(deleteNoteInNotebook.pending, (state) => {
+                state.isLoading = true
+            })
+            .addCase(deleteNoteInNotebook.rejected, (state, action) => {
+                state.isLoading = false
+                state.isError = true
+                state.message = action.payload
+            })
+            .addCase(deleteNoteInNotebook.fulfilled, (state, action) => {
+                state.isLoading = false
+                state.isSuccess = true
+                const { notebook } = action.payload
+                state.notebookNotesArray = notebook.notes
+                state.notebooksArray.find(notebookItem => {
+                  if(notebookItem._id === notebook._id) {
+                    notebookItem.notes = notebook.notes
+                  }
+                })
+            })
     }
 })
 
 export const {
-    addNewNotebook,
-    addNoteToNotebook,
-    editNoteInNotebook,
-    moveNoteToTrashInNotebook,
-    restoreNoteInNotebook,
-    deleteNoteInNotebook,
     selectNotebook,
-    changeNoteNotebook,
-    renameNotebook
+    addNoteToNotebookNotes,
+    editNoteInNotebook,
 } = notebooksSlice.actions;
 
 export const selectNotebooks = (state) => {
     return state.notebooks.notebooksArray;
 }
 
+export const selectNotebookNotes = (state) => {
+  return state.notebooks.notebookNotesArray
+}
+
 export const selectTrashNotebook = (state) => {
-    return state.notebooks.notebooksArray.find(notebook => notebook.id === 'trash-notebook');
+    return state.notebooks.notebooksArray.find(notebook => notebook._id === state.notebooks.trashNotebookId)
+}
+
+export const selectTrashNotebookId = (state) => {
+    return state.notebooks.trashNotebookId
+}
+
+export const selectCommonNotebookId = (state) => {
+    return state.notebooks.commonNotebookId
 }
 
 export default notebooksSlice.reducer;
