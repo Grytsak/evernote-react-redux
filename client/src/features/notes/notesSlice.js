@@ -285,7 +285,7 @@ const notesSlice = createSlice({
         state.isLoading = false
         state.isSuccess = true
 
-        state.notesArray.filter(note => note.id !== action.payload)
+        state.notesArray = state.notesArray.filter(note => note._id !== action.payload)
       })
   }
 });

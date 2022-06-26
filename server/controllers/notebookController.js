@@ -20,7 +20,6 @@ export const getNotebookNotes = asyncWrapper(async (req, res) => {
         res.status(400)
         throw new Error('Notebook not found')
     }
-
     res.status(200).json(notebook.notes)
 })
 

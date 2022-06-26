@@ -41,8 +41,10 @@ export const NoteEditor = () => {
     const [timer, setTimer] = useState(null)
 
     useEffect(() => {
-        setTitleValue(selectedNote.title)
-        setContentValue(selectedNote.content)
+        if(selectedNote.title) {
+            setTitleValue(selectedNote.title)
+            setContentValue(selectedNote.content)
+        }
     }, [selectedNote])
 
     const onEditNoteTitle = (e) => {
@@ -82,7 +84,8 @@ export const NoteEditor = () => {
                 notebook: trashNotebookId, 
                 inTrash: true, 
                 beforeTrashNotebook: selectedNote.notebook
-            }));
+            }))
+            console.log('selectedNote:', selectedNote)
             dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: selectedNote.notebook}))
             dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}))
         }
