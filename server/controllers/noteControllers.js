@@ -6,7 +6,13 @@ import asyncWrapper from '../middleware/async.js'
 // @route   GET /api/notes
 // @access  Private
 export const getAllNotes = asyncWrapper(async (req, res) => {
-    const notes = await Note.find({})
+    // Check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    const notes = await Note.find({user: req.user.id})
     res.status(200).json(notes)
 })
 
@@ -19,7 +25,14 @@ export const addNewNote = asyncWrapper(async (req, res) => {
         throw new Error('Please provide title for note')
     }
 
+    // Check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
     const note = await Note.create({
+        user: req.user.id,
         title: req.body.title,
         content: req.body.content,
         notebook: req.body.notebook
@@ -39,6 +52,18 @@ export const editNote = asyncWrapper(async (req, res) => {
         throw new Error('Note not found')
     }
 
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(note.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
     const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
     res.status(200).json(editedNote)
 })
@@ -52,6 +77,18 @@ export const changeNotebook = asyncWrapper(async (req, res) => {
     if(!note) {
         res.status(401)
         throw new Error('Note not found')
+    }
+
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(note.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
     }
 
     const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
@@ -69,6 +106,18 @@ export const moveNoteToTrash = asyncWrapper(async (req, res) => {
         throw new Error('Note not found')
     }
 
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(note.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
     const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
     res.status(200).json(editedNote)
 })
@@ -84,6 +133,18 @@ export const restoreNote = asyncWrapper(async (req, res) => {
         throw new Error('Note not found')
     }
 
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(note.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
     const editedNote = await Note.findByIdAndUpdate(req.params.id, req.body, {new: true})
     res.status(200).json(editedNote)
 })
@@ -97,6 +158,18 @@ export const deleteNote = asyncWrapper(async (req, res) => {
     if(!note) {
         res.status(400)
         throw new Error('Note not found')
+    }
+
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(note.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
     }
 
     await note.remove()

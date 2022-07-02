@@ -23,7 +23,8 @@ export const getAllNotes = createAsyncThunk(
   'notes/getAllNotes',
   async (_, thunkAPI) => {
     try {
-      return await notesService.getAllNotes()
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.getAllNotes(token)
     } catch (error) {
       const message =
         (error.response &&
@@ -40,7 +41,8 @@ export const addNewNote = createAsyncThunk(
   'notes/addNewNote',
   async (newNote, thunkAPI) => {
     try {
-      return await notesService.addNewNote(newNote)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.addNewNote(newNote, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -57,7 +59,8 @@ export const editNote = createAsyncThunk(
   'notes/editNote',
   async (obj, thunkAPI) => {
     try {
-      return await notesService.editNote(obj)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.editNote(obj, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -74,7 +77,8 @@ export const changeNotebook = createAsyncThunk(
   'notes/changeNotebook',
   async (obj, thunkAPI) => {
     try {
-      return await notesService.changeNotebook(obj)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.changeNotebook(obj, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -91,7 +95,8 @@ export const moveNoteToTrash = createAsyncThunk(
   'notes/moveNoteToTrash',
   async (obj, thunkAPI) => {
     try {
-      return await notesService.moveNoteToTrash(obj)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.moveNoteToTrash(obj, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -108,7 +113,8 @@ export const restoreNote = createAsyncThunk(
   'notes/restoreNote',
   async (obj, thunkAPI) => {
     try {
-      return await notesService.restoreNote(obj)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.restoreNote(obj, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -125,7 +131,8 @@ export const deleteNote = createAsyncThunk(
   'notes/deleteNote',
   async (id, thunkAPI) => {
     try {
-      return await notesService.deleteNote(id)
+      const token = thunkAPI.getState().auth.user.token
+      return await notesService.deleteNote(id, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -144,6 +151,23 @@ const notesSlice = createSlice({
   name: 'notes',
   initialState,
   reducers: {
+    resetNotes(state) {
+      state.notesArray = []
+      state.selectedNote = {
+        _id: '',
+        title: '',
+        content: '',
+        notebook: '',
+        date: '',
+        inTrash: false,
+        beforeTrashNotebook: ''
+      }
+      state.lastCreatedNoteId = ''
+      state.isError = false
+      state.isSuccess = false
+      state.isLoading = false
+      state.message = ''
+    },
     selectNote(state, action) {
       state.selectedNote = action.payload
     },
@@ -291,7 +315,8 @@ const notesSlice = createSlice({
 });
 
 export const {
-  selectNote,
+  resetNotes,
+  selectNote
 } = notesSlice.actions;
 
 export const selectNotes = (state) => {

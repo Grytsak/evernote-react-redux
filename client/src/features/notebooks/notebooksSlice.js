@@ -2,23 +2,8 @@ import { createSlice, createAsyncThunk, current } from "@reduxjs/toolkit"
 import * as notebooksService from './notebookService'
 
 const initialState = {
-    notebooksArray: [
-        // {
-        //     id: 'common-notebook',
-        //     name: 'Common',
-        //     notes: [],
-        //     date: new Date().toISOString()
-        // },
-        // {
-        //     id: 'trash-notebook',
-        //     name: 'Trash',
-        //     notes: [],
-        //     date: new Date().toISOString()
-        // }
-    ],
+    notebooksArray: [],
     notebookNotesArray: [],
-    commonNotebookId: '62922a2e8a293b5de3d2adc4',
-    trashNotebookId: '62922a1e8a293b5de3d2adc2',
     isError: false,
     isSuccess: false,
     isLoading: false,
@@ -29,7 +14,8 @@ export const getAllNotebooks = createAsyncThunk(
     'notes/getAllNotebooks',
     async (_, thunkAPI) => {
       try {
-        return await notebooksService.getAllNotebooks()
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.getAllNotebooks(token)
       } catch (error) {
         const message =
           (error.response &&
@@ -46,7 +32,8 @@ export const getNotebookNotes = createAsyncThunk(
   'notes/getNotebookNotes',
   async (id, thunkAPI) => {
     try {
-      return await notebooksService.getNotebookNotes(id)
+      const token = thunkAPI.getState().auth.user.token
+      return await notebooksService.getNotebookNotes(id, token)
     } catch (error) {
       const message =
         (error.response &&
@@ -63,7 +50,8 @@ export const addNewNotebook = createAsyncThunk(
     'notes/addNewNotebook',
     async (newNotebook, thunkAPI) => {
       try {
-        return await notebooksService.addNewNotebook(newNotebook)
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.addNewNotebook(newNotebook, token)
       } catch (error) {
         const message =
           (error.response &&
@@ -80,7 +68,8 @@ export const renameNotebook = createAsyncThunk(
     'notes/renameNotebook',
     async (obj, thunkAPI) => {
       try {
-        return await notebooksService.renameNotebook(obj)
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.renameNotebook(obj, token)
       } catch (error) {
         const message =
           (error.response &&
@@ -97,7 +86,8 @@ export const deleteNotebook = createAsyncThunk(
     'notes/deleteNotebook',
     async (id, thunkAPI) => {
       try {
-        return await notebooksService.deleteNotebook(id)
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.deleteNotebook(id, token)
       } catch (error) {
         const message =
           (error.response &&
@@ -114,7 +104,8 @@ export const addNoteToNotebook = createAsyncThunk(
     'notes/addNoteToNotebook',
     async (obj, thunkAPI) => {
       try {
-        return await notebooksService.addNoteToNotebook(obj)
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.addNoteToNotebook(obj, token)
       } catch (error) {
         const message =
           (error.response &&
@@ -131,7 +122,8 @@ export const deleteNoteInNotebook = createAsyncThunk(
     'notes/deleteNoteInNotebook',
     async (obj, thunkAPI) => {
       try {
-        return await notebooksService.deleteNoteInNotebook(obj)
+        const token = thunkAPI.getState().auth.user.token
+        return await notebooksService.deleteNoteInNotebook(obj, token)
       } catch (error) {
         const message =
           (error.response &&
@@ -148,6 +140,14 @@ const notebooksSlice = createSlice({
     name: 'notebooks',
     initialState,
     reducers: {
+        resetNotebooks(state) {
+          state.notebooksArray = []
+          state.notebookNotesArray = []
+          state.isError = false
+          state.isSuccess = false
+          state.isLoading = false
+          state.message = ''
+        },
         selectNotebook(state, action) {
             state.selectedNotebook = action.payload
         },
@@ -163,7 +163,7 @@ const notebooksSlice = createSlice({
             exsistingNote.title = title
             exsistingNote.content = content
           }
-        }
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -270,7 +270,7 @@ const notebooksSlice = createSlice({
             .addCase(deleteNoteInNotebook.fulfilled, (state, action) => {
                 state.isLoading = false
                 state.isSuccess = true
-                const { notebook } = action.payload
+                const { notebookUpdated: notebook } = action.payload
                 state.notebookNotesArray = notebook.notes
                 state.notebooksArray.find(notebookItem => {
                   if(notebookItem._id === notebook._id) {
@@ -282,6 +282,7 @@ const notebooksSlice = createSlice({
 })
 
 export const {
+    resetNotebooks,
     selectNotebook,
     addNoteToNotebookNotes,
     editNoteInNotebook,
@@ -296,15 +297,11 @@ export const selectNotebookNotes = (state) => {
 }
 
 export const selectTrashNotebook = (state) => {
-    return state.notebooks.notebooksArray.find(notebook => notebook._id === state.notebooks.trashNotebookId)
+  return state.notebooks.notebooksArray.find(notebook => notebook.role === 'trash')
 }
 
-export const selectTrashNotebookId = (state) => {
-    return state.notebooks.trashNotebookId
+export const selectCommonNotebook = (state) => {
+  return state.notebooks.notebooksArray.find(notebook => notebook.role === 'common')
 }
 
-export const selectCommonNotebookId = (state) => {
-    return state.notebooks.commonNotebookId
-}
-
-export default notebooksSlice.reducer;
+export default notebooksSlice.reducer

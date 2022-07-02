@@ -9,8 +9,8 @@ import {
         selectSelectedNote
     } from './notesSlice';    
 import { 
-        selectTrashNotebookId,
-        selectCommonNotebookId,
+        selectTrashNotebook,
+        selectCommonNotebook,
         addNoteToNotebook,
         deleteNoteInNotebook,
         selectNotebooks,
@@ -30,8 +30,8 @@ import commonCss from '../../scss/app/Common.module.scss';
 
 export const NoteEditor = () => {
     const dispatch = useDispatch()
-    const trashNotebookId = useSelector(selectTrashNotebookId)
-    const commonNotebookId = useSelector(selectCommonNotebookId)
+    const trashNotebook = useSelector(selectTrashNotebook)
+    const commonNotebook = useSelector(selectCommonNotebook)
     const selectedNote = useSelector(selectSelectedNote)
     const notebooks = useSelector(selectNotebooks)
     const selectedNoteNotebook = notebooks.find(notebook => notebook._id === selectedNote.notebook)
@@ -81,30 +81,29 @@ export const NoteEditor = () => {
         if(selectedNote._id) {
             dispatch(moveNoteToTrash({
                 _id: selectedNote._id, 
-                notebook: trashNotebookId, 
+                notebook: trashNotebook._id, 
                 inTrash: true, 
                 beforeTrashNotebook: selectedNote.notebook
             }))
-            console.log('selectedNote:', selectedNote)
             dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: selectedNote.notebook}))
-            dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}))
+            dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: trashNotebook._id}))
         }
     }
 
     const onRestoreNote = () => {
         dispatch(restoreNote({
             _id: selectedNote._id, 
-            notebook: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebookId, 
+            notebook: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebook._id, 
             inTrash: false, 
             beforeTrashNotebook: ''
         }))
-        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}))
-        dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebookId}))
+        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebook._id}))
+        dispatch(addNoteToNotebook({noteID: selectedNote._id, notebookID: beforeTrash ? selectedNote.beforeTrashNotebook : commonNotebook._id}))
     }
 
     const onDeleteNote = () => {
         dispatch(deleteNote(selectedNote._id));
-        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebookId}));
+        dispatch(deleteNoteInNotebook({noteID: selectedNote._id, notebookID: trashNotebook._id}));
     }
 
 
@@ -132,12 +131,17 @@ export const NoteEditor = () => {
 
                 <div className={`${commonCss.actions_menu} actions_menu ${selectedNote._id ? 'change-notebook-active' : ''}`}>
                     <button 
-                        className={`${commonCss.actions_menu__togle_btn} ${commonCss.btn} ${commonCss.actions_menu_change_notebook_btn}`} 
+                        className={`
+                        ${commonCss.actions_menu__togle_btn} 
+                        ${commonCss.btn} 
+                        ${commonCss.actions_menu_change_notebook_btn} 
+                        ${selectedNote.inTrash ? 'hide' : ''}
+                        `} 
                         onClick={toggleMenu}>
                         <FontAwesomeIcon icon="exchange-alt" className={commonCss.actions_menu__icon} />
                     </button>  
                     <div className={`${commonCss.actions_menu__container} actions_menu_elements`}>
-                        {notebooks.filter((notebook) => notebook._id !== trashNotebookId && notebook._id !== selectedNote.notebook )
+                        {notebooks.filter((notebook) => notebook._id !== trashNotebook._id && notebook._id !== selectedNote.notebook )
                         .map((notebook, index) => {
                             return(<p key={index} className={commonCss.actions_menu__item} onClick={() => onChangeNoteNotebook(selectedNote, notebook._id)}>{notebook.name}</p>)
                         })}
@@ -159,23 +163,14 @@ export const NoteEditor = () => {
                 id="note-title" 
                 className={styles.note_editor__note_title}
                 value={titleValue}
-                // value={selectedNote.title}
                 onChange={onEditNoteTitle}
                 />
             <ReactQuill
                 theme="snow"
                 className={styles.note_editor__text_editor}
                 value={contentValue || ''}
-                // value={selectedNote.content}
-                // onKeyUp={onEditNoteContent}
                 onChange={onEditNoteContent}
             />
-            {/* <textarea name="text" 
-                id="note-text" 
-                className={styles.note_editor__text_editor}
-                value={selectedNote.text}
-                onChange={onEditNoteText}
-                ></textarea> */}
         </div>
     )
 }

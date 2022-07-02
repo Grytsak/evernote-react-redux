@@ -3,18 +3,17 @@ import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { 
         selectNotebooks, 
-        selectTrashNotebookId,
-        selectCommonNotebookId,
+        selectTrashNotebook,
+        selectCommonNotebook,
         addNoteToNotebook,
         deleteNoteInNotebook,
-        deleteNotebook } 
-        from './notebooksSlice';
+        deleteNotebook 
+    } from './notebooksSlice';
 import { selectNote, moveNoteToTrash } from '../notes/notesSlice';
 import { toggleMenu } from '../../app/helper-functions';
 
 import { AddNewNotebook } from './AddNewNotebook';
 import { RenameNotebookPopup } from './RenameNotebookPopup';
-
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -24,8 +23,8 @@ import commonCss from '../../scss/app/Common.module.scss';
 export const NotebookList = () => {
     const dispatch = useDispatch();
     const noteBooks = useSelector(selectNotebooks);
-    const trashNotebookId = useSelector(selectTrashNotebookId)
-    const commonNotebookId = useSelector(selectCommonNotebookId)
+    const trashNotebook = useSelector(selectTrashNotebook)
+    const commonNotebook = useSelector(selectCommonNotebook)
 
     const [notebookId, setNotebookId] = useState('')
     const [notebookName, setNotebookName] = useState('')
@@ -54,12 +53,12 @@ export const NotebookList = () => {
             notebookNotes.forEach((note, index) => {
                 dispatch(moveNoteToTrash({
                     _id: note, 
-                    notebook: trashNotebookId, 
+                    notebook: trashNotebook._id, 
                     inTrash: true, 
-                    beforeTrashNotebook: commonNotebookId
+                    beforeTrashNotebook: commonNotebook._id
                 }))
                 dispatch(deleteNoteInNotebook({noteID: note, notebookID: notebook._id}))
-                dispatch(addNoteToNotebook({noteID: note, notebookID: trashNotebookId}))
+                dispatch(addNoteToNotebook({noteID: note, notebookID: trashNotebook._id}))
                 if(index === notebookNotes.length - 1) {
                     deleteNotebookCallback(id)
                 }
@@ -71,7 +70,7 @@ export const NotebookList = () => {
 
 
     const renderNotebooks = noteBooks.filter( notebook => {
-        if(notebook._id === trashNotebookId) {
+        if(notebook._id === trashNotebook._id) {
             return false;
         } 
         return true;
@@ -122,7 +121,7 @@ export const NotebookList = () => {
                                 <p className={commonCss.actions_menu__item}>Add New Note</p>
                                 <p className={`
                                 ${commonCss.actions_menu__item} 
-                                ${notebook._id === commonNotebookId 
+                                ${notebook._id === commonNotebook._id 
                                 ? commonCss.actions_menu__item_inactive : ''}
                                 `} onClick={() => onDeleteNotebook(notebook._id)}>Delete</p>
                             </div>

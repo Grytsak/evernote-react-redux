@@ -6,7 +6,14 @@ import asyncWrapper from '../middleware/async.js'
 // @route   GET /api/notebooks
 // @access  Private
 export const getAllNotebooks = asyncWrapper(async (req, res) => {
-    const notebooks = await Notebook.find({})
+    // Check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+
+    const notebooks = await Notebook.find({user: req.user.id})
     res.status(200).json(notebooks)
 })
 
@@ -14,6 +21,12 @@ export const getAllNotebooks = asyncWrapper(async (req, res) => {
 // @route   GET /api/notebook-notes/:id
 // @access  Private
 export const getNotebookNotes = asyncWrapper(async (req, res) => {
+    // Check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
     const notebook = await Notebook.findById(req.params.id).populate('notes') 
 
     if(!notebook) {
@@ -32,15 +45,23 @@ export const addNewNotebook = asyncWrapper(async (req, res) => {
         throw new Error('Please provide name for notebook')
     }
 
+    // Check for user
+    if (!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
     let notebook = {}
 
     if(req.body.role) {
         notebook = await Notebook.create({
+            user: req.user.id,
             name: req.body.name,
             role: req.body.role,
         })
     } else {
         notebook = await Notebook.create({
+            user: req.user.id,
             name: req.body.name,
         })
     }
@@ -60,6 +81,18 @@ export const renameNotebook = asyncWrapper(async (req, res) => {
         throw new Error('Notebook not found')
     }
 
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(notebook.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
     const editedNotebook = await Notebook.findByIdAndUpdate(req.params.id, req.body, {new: true})
     res.status(200).json(editedNotebook)
 })
@@ -75,6 +108,18 @@ export const deleteNotebook = asyncWrapper(async (req, res) => {
         throw new Error('Notebook not found')
     }
 
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(notebook.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
     await notebook.remove()
     res.status(200).json(req.params.id)
 })
@@ -84,12 +129,26 @@ export const deleteNotebook = asyncWrapper(async (req, res) => {
 // @access  Private
 export const addNoteToNotebook = asyncWrapper(async (req, res) => {
     const { noteID, notebookID } = req.body
-    const notebook = await Notebook.findByIdAndUpdate(
+    const notebook = await Notebook.findById(notebookID)
+
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(notebook.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
+    const notebookUpdated = await Notebook.findByIdAndUpdate(
         notebookID, 
         {$push: {"notes": noteID}},
         {new: true})
 
-    res.status(200).json(notebook)
+    res.status(200).json(notebookUpdated)
 })
 
 // @desc    Delete note in notebook
@@ -97,9 +156,23 @@ export const addNoteToNotebook = asyncWrapper(async (req, res) => {
 // @access  Private
 export const deleteNoteInNotebook = asyncWrapper(async (req, res) => {
     const { noteID, notebookID } = req.body
-    const notebook = await Notebook.findByIdAndUpdate(
+    const notebook = await Notebook.findById(notebookID)
+
+    // Check for user
+    if(!req.user) {
+        res.status(401)
+        throw new Error('User not found')
+    }
+
+    // Make sure the logged in user matches the task user
+    if(notebook.user.toString() !== req.user.id) {
+        res.status(401)
+        throw new Error('User not authorized')
+    }
+
+    const notebookUpdated = await Notebook.findByIdAndUpdate(
         notebookID, 
         {$pull: {"notes": noteID}},
         {new: true}).populate('notes')
-    res.status(200).json({notebook, noteID})
+    res.status(200).json({notebookUpdated, noteID})
 })

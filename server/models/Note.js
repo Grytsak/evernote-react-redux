@@ -3,6 +3,11 @@ import Notebook from './Notebook.js'
 
 const noteSchema = new mongoose.Schema(
     {
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: 'User'
+        },
         title: {
             type: String,
             required: [true, 'must provide title']

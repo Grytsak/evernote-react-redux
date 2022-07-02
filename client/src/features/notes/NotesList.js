@@ -25,7 +25,6 @@ export const NotesList = () => {
                 <div key={note._id} className={styles.notes_list__note} onClick={() => markSelected(note)}>
                         <h3 className={styles.notes_list__note_title}>{note.title}</h3>
                         <p className={styles.notes_list__note_text}>{stripedHtmlContent.slice(0, 40)}</p>
-                        <p className={styles.notes_list__note_text}>{note._id}</p>
                         <p className={styles.notes_list__note_date}><TimeAgo timestamp={note.date} /></p>
                 </div>
             )

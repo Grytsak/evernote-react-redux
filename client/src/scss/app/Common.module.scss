@@ -6,6 +6,11 @@
   text-decoration: none;
 }
 
+:global(.hide) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 /* Btns */
 .btn {
     background: none;
@@ -18,6 +23,9 @@
 }
 
 .btn___main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
   height: 40px;
@@ -28,11 +36,18 @@
   outline: none;
   padding: 0 10px;
   text-align: center;
+  text-decoration: none;
 }
 
 .btn___success {
   color: $light-grey;
   background-color: $main-green;
+}
+
+.btn___common {
+  color: $light-grey;
+  background-color: $transparent;
+  border: 1px solid ;
 }
 /* Btns end*/
   
