@@ -118,7 +118,7 @@ function Register() {
                         </button>
                         <Link to='/login' className={`${commonCss.btn___main} ${commonCss.btn___common}`}>
                           Login
-                      </Link>
+                        </Link>
                     </div>
                 </form>
             </div>

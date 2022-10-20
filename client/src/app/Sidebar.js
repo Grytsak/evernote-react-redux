@@ -80,20 +80,20 @@ export const Sidebar = () => {
                     Notes
                 </Link>
             </div>
-            <div className={styles.sidebar__item}>
+            {/* <div className={styles.sidebar__item}>
                 <FontAwesomeIcon icon="tasks" className={styles.sidebar__icon} /> 
                 Tasks
-            </div>
+            </div> */}
             <div className={styles.sidebar__item}>
                 <Link to="/notebooks" className={styles.sidebar__link}>
                     <FontAwesomeIcon icon="book" className={styles.sidebar__icon} /> 
                     Notebooks
                 </Link>
             </div>
-            <div className={styles.sidebar__item}>
+            {/* <div className={styles.sidebar__item}>
                 <FontAwesomeIcon icon="tag" className={styles.sidebar__icon} /> 
                 Tags
-            </div>
+            </div> */}
             <div className={styles.sidebar__item}>
                 <Link to="/notebook/trash-notebook" className={styles.sidebar__link}>
                     <FontAwesomeIcon icon="trash" className={styles.sidebar__icon} /> 
