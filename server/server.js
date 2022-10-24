@@ -23,7 +23,7 @@ app.use('/api/users', usersRoutes)
 app.use('/api/notes', noteRoutes)
 app.use('/api/notebooks', notebookRoutes)
 
-// if(process.env.NODE_ENV === 'production') {
+if(process.env.NODE_ENV === 'production') {
     app.use(express.static(path.join(__dirname, '../client/build')))
 
     app.get('*', (req, res) =>
@@ -31,9 +31,9 @@ app.use('/api/notebooks', notebookRoutes)
       path.resolve(__dirname, '../', 'client', 'build', 'index.html')
     )
   )
-// } else {
-//     app.get('/', (req, res) => res.send('Please set to production'));
-// }
+} else {
+    app.get('/', (req, res) => res.send('Please set to production'));
+}
 
 const start = async () => {
     try {
