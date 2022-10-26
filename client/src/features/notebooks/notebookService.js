@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const url = 'http://localhost:5000/api/notebooks'
+// const url = 'http://localhost:5000/api/notebooks'
+const url = '/api/notebooks'
 
 export const getAllNotebooks = async (token) => {
     const config = {

@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const url = 'http://localhost:5000/api/notes'
+// const url = 'http://localhost:5000/api/notes'
+const url = '/api/notes'
 
 export const getAllNotes = async (token) => {
     const config = {
