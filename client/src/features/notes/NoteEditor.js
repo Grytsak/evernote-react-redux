@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { 
         editNote, 
@@ -21,6 +21,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
+import debounce from 'lodash.debounce';
+
 import '../../scss/3d-party/ReactQuill.scss';
 
 import { toggleMenu } from '../../app/helper-functions';
@@ -41,11 +43,12 @@ export const NoteEditor = () => {
     const [timer, setTimer] = useState(null)
 
     useEffect(() => {
-        if(selectedNote.title) {
+        if(selectedNote._id) {
             setTitleValue(selectedNote.title)
             setContentValue(selectedNote.content)
+            console.log('useEffect:', selectedNote.content)
         }
-    }, [selectedNote])
+    }, [selectedNote._id])
 
     const onEditNoteTitle = (e) => {
         setTitleValue(e.target.value)
@@ -54,7 +57,7 @@ export const NoteEditor = () => {
         const newTimer = setTimeout(() => {
             dispatch(editNote({_id: selectedNote._id, title: e.target.value, content: selectedNote.content }))
             dispatch(editNoteInNotebook({_id: selectedNote._id, title: e.target.value, content: selectedNote.content}))
-          }, 500)
+          }, 1000)
       
           setTimer(newTimer)
     }
@@ -66,7 +69,7 @@ export const NoteEditor = () => {
         const newTimer = setTimeout(() => {
             dispatch(editNote({_id: selectedNote._id, title: selectedNote.title, content: val}))
             dispatch(editNoteInNotebook({_id: selectedNote._id, title: selectedNote.title, content: val}))
-          }, 500)
+          }, 1000)
       
           setTimer(newTimer)
     }
@@ -168,7 +171,7 @@ export const NoteEditor = () => {
             <ReactQuill
                 theme="snow"
                 className={styles.note_editor__text_editor}
-                value={contentValue || ''}
+                value={contentValue}
                 onChange={onEditNoteContent}
             />
         </div>

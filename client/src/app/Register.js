@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useSelector, useDispatch }  from 'react-redux'
 import { Link, useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import { ToastContainer, toast } from 'react-toastify'
+import '../../node_modules/react-toastify/dist/ReactToastify.css'
 import { register, resetAuth } from '../features/auth/authSlice'
 import { 
     selectTrashNotebook,
@@ -63,6 +64,7 @@ function Register() {
 
     return (
         <section className={styles.login}>
+            <ToastContainer />
             <div className={styles.login__container}>
                 <h1 className={styles.login__title}>Register</h1>
                 <p className={styles.login__description}>Please create an account</p>

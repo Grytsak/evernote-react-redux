@@ -4,6 +4,7 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 import express from "express"
 import connectDB from "./db/connect.js"
+import errorHandler from './middleware/errorHandler.js'
 import dotenv from 'dotenv'
 dotenv.config()
 import cors from 'cors'
@@ -34,6 +35,8 @@ if(process.env.NODE_ENV === 'production') {
 } else {
     app.get('/', (req, res) => res.send('Please set to production'));
 }
+
+app.use(errorHandler);
 
 const start = async () => {
     try {
