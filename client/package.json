@@ -1,7 +1,7 @@
 {
   "name": "evernote-app",
   "version": "0.1.0",
-  "proxy": "http://localhost:5000",
+  "proxy": "https://evernote-react-redux-hrytsak.cyclic.app/",
   "private": true,
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.36",

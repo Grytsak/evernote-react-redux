@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route } from 'react-router-dom'
 
 import { selectUser } from './features/auth/authSlice'
 import { 
