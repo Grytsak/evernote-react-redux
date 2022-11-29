@@ -57,7 +57,7 @@ export const NoteEditor = () => {
         const newTimer = setTimeout(() => {
             dispatch(editNote({_id: selectedNote._id, title: e.target.value, content: selectedNote.content }))
             dispatch(editNoteInNotebook({_id: selectedNote._id, title: e.target.value, content: selectedNote.content}))
-          }, 1000)
+          }, 500)
       
           setTimer(newTimer)
     }
@@ -69,7 +69,7 @@ export const NoteEditor = () => {
         const newTimer = setTimeout(() => {
             dispatch(editNote({_id: selectedNote._id, title: selectedNote.title, content: val}))
             dispatch(editNoteInNotebook({_id: selectedNote._id, title: selectedNote.title, content: val}))
-          }, 1000)
+          }, 500)
       
           setTimer(newTimer)
     }
