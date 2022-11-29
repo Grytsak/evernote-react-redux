@@ -1,7 +1,6 @@
 import axios from "axios"
 
 const url = '/api/users'
-// const url = 'http://localhost:5000/api/users'
 
 export const register = async (userData) => {
     const response = await axios.post(url, userData)
